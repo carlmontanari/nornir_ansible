@@ -1,0 +1,11 @@
+---
+name: nornir_ansible
+summary: |
+  Ansible Inventory plugin for Nornir.
+nornir_version: ~3
+categories:
+  - ansible
+  - networking
+intro_file: README.md
+badges:
+  - https://github.com/carlmontanari/nornir_ansible/workflows/Weekly%20Build/badge.svg
