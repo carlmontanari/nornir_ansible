@@ -8,14 +8,14 @@ with open("README.md", "r") as f:
     README = f.read()
 
 setuptools.setup(
-    name="nornir_ansible_inventory",
+    name="nornir_ansible",
     version="2020.04.11",
     author=__author__,
     author_email="carl.r.montanari@gmail.com",
     description="",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/carlmontanari/nornir_ansible_inventory",
+    url="https://github.com/carlmontanari/nornir_ansible",
     packages=setuptools.find_packages(),
     install_requires=["mypy_extensions>=0.4.1", "ruamel.yaml>=0.16.10", "nornir>=2.4.0"],
     extras_require={},

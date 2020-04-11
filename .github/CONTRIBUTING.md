@@ -1,8 +1,7 @@
 Contributing
 =======
 
-Thanks for thinking about contributing to nornir_ansible_inventory! Contributions are not expected, but are quite
- welcome.
+Thanks for thinking about contributing to nornir_ansible! Contributions are not expected, but are quite welcome.
 
 Contributions of all kinds are welcomed -- typos, doc updates, adding examples, bug fixes, and feature adds.
 
