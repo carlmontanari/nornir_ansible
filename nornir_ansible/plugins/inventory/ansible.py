@@ -4,30 +4,30 @@ import logging
 import os
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, DefaultDict, Dict, MutableMapping, Optional, Tuple, Union, cast
+from typing import Any, DefaultDict, Dict, MutableMapping, Optional, Tuple, Type, Union, cast
 
 import ruamel.yaml
 from mypy_extensions import TypedDict
-from nornir.core.deserializer.inventory import (
-    DefaultsDict,
-    GroupsDict,
-    HostsDict,
-    Inventory,
-    InventoryElement,
-    VarsDict,
-)
 from nornir.core.exceptions import NornirNoValidInventoryError
+from nornir.core.inventory import (
+    ConnectionOptions,
+    Defaults,
+    Group,
+    Host,
+    HostOrGroup,
+    Hosts,
+    Inventory,
+    ParentGroups,
+)
 from ruamel.yaml.composer import ComposerError
 from ruamel.yaml.scanner import ScannerError
 
 VARS_FILENAME_EXTENSIONS = ["", ".ini", ".yml", ".yaml"]
-
-
+RESERVED_FIELDS = ("hostname", "port", "username", "password", "platform", "connection_options")
 YAML = ruamel.yaml.YAML(typ="safe")
+LOG = logging.getLogger(__name__)
 
-logger = logging.getLogger(__name__)
-
-
+VarsDict = Dict[str, Any]
 AnsibleHostsDict = Dict[str, Optional[VarsDict]]
 
 AnsibleGroupDataDict = TypedDict(
@@ -50,9 +50,9 @@ class AnsibleParser:
         """
         self.hostsfile = hostsfile
         self.path = os.path.dirname(hostsfile)
-        self.hosts: HostsDict = {}
-        self.groups: GroupsDict = {}
-        self.defaults: DefaultsDict = {"data": {}}
+        self.hosts: Dict[str, Any] = {}
+        self.groups: Dict[str, Any] = {}
+        self.defaults: Dict[str, Any] = {"data": {}}
         self.original_data: Optional[AnsibleGroupsDict] = None
         self.load_hosts_file()
 
@@ -115,9 +115,7 @@ class AnsibleParser:
             self.normalize_data(self.hosts[host], data, vars_file_data)
             self.map_nornir_vars(self.hosts[host])
 
-    def normalize_data(
-        self, host: HostsDict, data: Dict[str, Any], vars_data: Dict[str, Any]
-    ) -> None:
+    def normalize_data(self, host: Hosts, data: Dict[str, Any], vars_data: Dict[str, Any]) -> None:
         """
         Parse inventory hosts
 
@@ -130,19 +128,24 @@ class AnsibleParser:
             vars_data: dict of vars to parse
 
         """
-        reserved_fields = InventoryElement.__fields__.keys()
         self.map_nornir_vars(data)
         for k, v in data.items():
-            if k in reserved_fields:
+            if k in RESERVED_FIELDS:
                 host[k] = v
             else:
                 host["data"][k] = v
         self.map_nornir_vars(vars_data)
         for k, v in vars_data.items():
-            if k in reserved_fields:
+            if k in RESERVED_FIELDS:
                 host[k] = v
             else:
                 host["data"][k] = v
+        for field in RESERVED_FIELDS:
+            if field not in host:
+                if field == "connection_options":
+                    host[field] = {}
+                else:
+                    host[field] = None
 
     def sort_groups(self) -> None:
         """Sort group data"""
@@ -174,9 +177,9 @@ class AnsibleParser:
                 vars_file = vars_file_base.with_suffix(vars_file_base.suffix + extension)
                 if vars_file.is_file():
                     with open(vars_file) as f:
-                        logger.debug("AnsibleInventory: reading var file %r", vars_file)
+                        LOG.debug("AnsibleInventory: reading var file %r", vars_file)
                         return cast(Dict[str, Any], YAML.load(f))
-            logger.debug(
+            LOG.debug(
                 "AnsibleInventory: no vars file was found with the path %r "
                 "and one of the supported extensions: %s",
                 vars_file_base,
@@ -320,7 +323,7 @@ class YAMLParser(AnsibleParser):
             self.original_data = cast(AnsibleGroupsDict, YAML.load(f))
 
 
-def parse(hostsfile: str) -> Tuple[HostsDict, GroupsDict, DefaultsDict]:
+def parse(hostsfile: str) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
     """
     Parse provided inventory file
 
@@ -334,24 +337,121 @@ def parse(hostsfile: str) -> Tuple[HostsDict, GroupsDict, DefaultsDict]:
         try:
             parser = YAMLParser(hostsfile)
         except (ScannerError, ComposerError):
-            logger.error("AnsibleInventory: file %r is not INI or YAML file", hostsfile)
+            LOG.error("AnsibleInventory: file %r is not INI or YAML file", hostsfile)
             raise NornirNoValidInventoryError(
                 f"AnsibleInventory: no valid inventory source(s) to parse. Tried: {hostsfile}"
             )
-
     parser.parse()
-
     return parser.hosts, parser.groups, parser.defaults
 
 
-class AnsibleInventory(Inventory):
-    def __init__(self, *args: Any, hostsfile: str = "hosts", **kwargs: Any) -> None:
+def _get_connection_options(data: Dict[str, Any]) -> ConnectionOptions:
+    """
+    Get connection option information for a given host/group
+
+    Arguments:
+        data: dictionary of connection options for host/group
+
+    """
+    connection_options = {}
+    for connection_name, connection_data in data.items():
+        connection_options[connection_name] = ConnectionOptions(
+            hostname=connection_data.get("hostname"),
+            port=connection_data.get("port"),
+            username=connection_data.get("username"),
+            password=connection_data.get("password"),
+            platform=connection_data.get("platform"),
+            extras=connection_data.get("extras"),
+        )
+    return connection_options
+
+
+def _get_defaults(data: Dict[str, Any]) -> Defaults:
+    """
+    Get defaults information for a given host/group
+
+    Arguments:
+        data: dictionary of defaults data
+
+    """
+    return Defaults(
+        hostname=data.get("hostname"),
+        port=data.get("port"),
+        username=data.get("username"),
+        password=data.get("password"),
+        platform=data.get("platform"),
+        data=data.get("data"),
+        connection_options=_get_connection_options(data.get("connection_options", {})),
+    )
+
+
+def _get_inventory_element(
+    typ: Type[HostOrGroup], data: Dict[str, Any], name: str, defaults: Defaults
+) -> HostOrGroup:
+    """
+    Get inventory information for a given host/group
+
+    Arguments:
+        data: dictionary of host or group data to serialize
+
+    """
+    return typ(
+        name=name,
+        hostname=data.get("hostname"),
+        port=data.get("port"),
+        username=data.get("username"),
+        password=data.get("password"),
+        platform=data.get("platform"),
+        data=data.get("data"),
+        groups=data.get("groups"),
+        defaults=defaults,
+        connection_options=_get_connection_options(data.get("connection_options", {})),
+    )
+
+
+class AnsibleInventory:
+    def __init__(self, hostsfile: str = "hosts",) -> None:
         """
-        Ansible Inventory plugin supporting ini, yaml, and dynamic inventory sources.
+        Ansible Inventory plugin supporting ini and yaml inventory sources.
 
         Arguments:
             hostsfile: Path to valid Ansible inventory
 
         """
-        host_vars, group_vars, defaults = parse(hostsfile)
-        super().__init__(hosts=host_vars, groups=group_vars, defaults=defaults, *args, **kwargs)
+        self.hosts, self.groups, self.defaults = parse(hostsfile)
+
+    def load(self) -> Inventory:
+        """Return nornir Inventory object."""
+        serialized_defaults = _get_defaults(self.defaults)
+
+        serialized_hosts = {}
+        for host_name, host_data in self.hosts.items():
+            serialized_hosts[host_name] = _get_inventory_element(
+                Host, host_data, host_name, serialized_defaults
+            )
+
+        serialized_groups = {}
+        for group_name, group_data in self.groups.items():
+            serialized_groups[group_name] = _get_inventory_element(
+                Group, group_data, group_name, serialized_defaults
+            )
+
+        for h in serialized_hosts.values():
+            h.groups = ParentGroups([serialized_groups[g] for g in h.groups])
+
+        for g in serialized_groups.values():
+            g.groups = ParentGroups([serialized_groups[g] for g in g.groups])
+
+        return Inventory(
+            hosts=serialized_hosts, groups=serialized_groups, defaults=serialized_defaults
+        )
+
+    def dict(self) -> Dict[str, Any]:
+        """
+        Return serialized dictionary of inventory
+        """
+        return {
+            "hosts": {n: h.dict() for n, h in self.hosts.items()},
+            "groups": {n: g.dict() for n, g in self.groups.items()},
+            "defaults": self.defaults,
+        }

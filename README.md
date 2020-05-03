@@ -23,12 +23,12 @@ pip install nornir_ansible
 
 # Basic Example
 
-In your nornir configuration, set the inventory plugin value to `nornir_ansible.inventory.ansible.AnsibleInventory`
+In your nornir configuration, set the inventory plugin value to `AnsibleInventory`
 
 ```yaml
 ---
 inventory:
-  plugin: nornir_ansible.inventory.ansible.AnsibleInventory
+  plugin: AnsibleInventory
   options:
     hostsfile: "inventory.yaml"
 ```
@@ -70,7 +70,7 @@ Initialize your nornir object and validate the appropriate inventory plugin was 
 >>> from nornir import InitNornir
 >>> nr = InitNornir(config_file="config.yaml")
 >>> print(nr.config.inventory.plugin)
-<class 'nornir_ansible.inventory.ansible.AnsibleInventory'>
+<class 'nornir_ansible.plugins.inventory.ansible.AnsibleInventory'>
 >>> print(nr.inventory.hosts)
 {'sea-eos-1': Host: sea-eos-1, 'sea-nxos-1': Host: sea-nxos-1}
 >>>

@@ -3,21 +3,11 @@ import os
 import pytest
 import ruamel.yaml
 from nornir.core.exceptions import NornirNoValidInventoryError
+from nornir_utils.plugins.inventory import simple
 
-from nornir_ansible.inventory import ansible
+from nornir_ansible.plugins.inventory import ansible
 
 BASE_PATH = os.path.join(os.path.dirname(__file__), "ansible")
-
-
-def save(inv_serialized, hosts_file, groups_file, defaults_file):
-    yml = ruamel.yaml.YAML(typ="safe")
-    yml.default_flow_style = False
-    with open(hosts_file, "w+") as f:
-        yml.dump(inv_serialized["hosts"], f)
-    with open(groups_file, "w+") as f:
-        yml.dump(inv_serialized["groups"], f)
-    with open(defaults_file, "w+") as f:
-        yml.dump(inv_serialized["defaults"], f)
 
 
 def read(hosts_file, groups_file, defaults_file):
@@ -35,23 +25,26 @@ class Test(object):
     @pytest.mark.parametrize("case", ["ini", "yaml", "yaml2", "yaml3"])
     def test_inventory(self, case):
         base_path = os.path.join(BASE_PATH, case)
-        hosts_file = os.path.join(base_path, "expected", "hosts.yaml")
-        groups_file = os.path.join(base_path, "expected", "groups.yaml")
-        defaults_file = os.path.join(base_path, "expected", "defaults.yaml")
+        expected_hosts_file = os.path.join(base_path, "expected", "hosts.yaml")
+        expected_groups_file = os.path.join(base_path, "expected", "groups.yaml")
+        expected_defaults_file = os.path.join(base_path, "expected", "defaults.yaml")
 
-        inv = ansible.AnsibleInventory.deserialize(
-            hostsfile=os.path.join(base_path, "source", "hosts")
-        )
-        inv_serialized = ansible.AnsibleInventory.serialize(inv).dict()
-
-        #  save(inv_serialized, hosts_file, groups_file, defaults_file)
-
+        inv = ansible.AnsibleInventory(hostsfile=os.path.join(base_path, "source", "hosts"))
         expected_hosts, expected_groups, expected_defaults = read(
-            hosts_file, groups_file, defaults_file
+            expected_hosts_file, expected_groups_file, expected_defaults_file
         )
-        assert inv_serialized["hosts"] == expected_hosts
-        assert inv_serialized["groups"] == expected_groups
-        assert inv_serialized["defaults"] == expected_defaults
+        assert inv.hosts == expected_hosts
+        assert inv.groups == expected_groups
+        assert inv.defaults == expected_defaults
+
+        serialized_inv = inv.load()
+        control_inv = simple.SimpleInventory(
+            host_file=expected_hosts_file,
+            group_file=expected_groups_file,
+            defaults_file=expected_defaults_file,
+        )
+        serialized_control_inv = control_inv.load()
+        assert serialized_inv.dict() == serialized_control_inv.dict()
 
     def test_parse_error(self):
         base_path = os.path.join(BASE_PATH, "parse_error")
