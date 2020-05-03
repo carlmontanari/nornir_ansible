@@ -39,19 +39,15 @@ class Test(object):
         groups_file = os.path.join(base_path, "expected", "groups.yaml")
         defaults_file = os.path.join(base_path, "expected", "defaults.yaml")
 
-        inv = ansible.AnsibleInventory.deserialize(
+        inv = ansible.AnsibleInventory(
             hostsfile=os.path.join(base_path, "source", "hosts")
         )
-        inv_serialized = ansible.AnsibleInventory.serialize(inv).dict()
-
-        #  save(inv_serialized, hosts_file, groups_file, defaults_file)
-
         expected_hosts, expected_groups, expected_defaults = read(
             hosts_file, groups_file, defaults_file
         )
-        assert inv_serialized["hosts"] == expected_hosts
-        assert inv_serialized["groups"] == expected_groups
-        assert inv_serialized["defaults"] == expected_defaults
+        assert inv.hosts == expected_hosts
+        assert inv.groups == expected_groups
+        assert inv.defaults == expected_defaults
 
     def test_parse_error(self):
         base_path = os.path.join(BASE_PATH, "parse_error")
