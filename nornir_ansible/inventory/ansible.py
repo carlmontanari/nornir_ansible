@@ -8,26 +8,16 @@ from typing import Any, DefaultDict, Dict, MutableMapping, Optional, Tuple, Unio
 
 import ruamel.yaml
 from mypy_extensions import TypedDict
-from nornir.core.deserializer.inventory import (
-    DefaultsDict,
-    GroupsDict,
-    HostsDict,
-    Inventory,
-    InventoryElement,
-    VarsDict,
-)
 from nornir.core.exceptions import NornirNoValidInventoryError
+from nornir.core.inventory import Defaults, Groups, Hosts, Inventory, InventoryElement
 from ruamel.yaml.composer import ComposerError
 from ruamel.yaml.scanner import ScannerError
 
 VARS_FILENAME_EXTENSIONS = ["", ".ini", ".yml", ".yaml"]
-
-
 YAML = ruamel.yaml.YAML(typ="safe")
+LOG = logging.getLogger(__name__)
 
-logger = logging.getLogger(__name__)
-
-
+VarsDict = Dict[str, Any]
 AnsibleHostsDict = Dict[str, Optional[VarsDict]]
 
 AnsibleGroupDataDict = TypedDict(
@@ -50,9 +40,9 @@ class AnsibleParser:
         """
         self.hostsfile = hostsfile
         self.path = os.path.dirname(hostsfile)
-        self.hosts: HostsDict = {}
-        self.groups: GroupsDict = {}
-        self.defaults: DefaultsDict = {"data": {}}
+        self.hosts: Hosts = {}
+        self.groups: Groups = {}
+        self.defaults: Defaults = {"data": {}}
         self.original_data: Optional[AnsibleGroupsDict] = None
         self.load_hosts_file()
 
@@ -115,9 +105,7 @@ class AnsibleParser:
             self.normalize_data(self.hosts[host], data, vars_file_data)
             self.map_nornir_vars(self.hosts[host])
 
-    def normalize_data(
-        self, host: HostsDict, data: Dict[str, Any], vars_data: Dict[str, Any]
-    ) -> None:
+    def normalize_data(self, host: Hosts, data: Dict[str, Any], vars_data: Dict[str, Any]) -> None:
         """
         Parse inventory hosts
 
@@ -130,7 +118,7 @@ class AnsibleParser:
             vars_data: dict of vars to parse
 
         """
-        reserved_fields = InventoryElement.__fields__.keys()
+        reserved_fields = InventoryElement.__slots__
         self.map_nornir_vars(data)
         for k, v in data.items():
             if k in reserved_fields:
@@ -174,9 +162,9 @@ class AnsibleParser:
                 vars_file = vars_file_base.with_suffix(vars_file_base.suffix + extension)
                 if vars_file.is_file():
                     with open(vars_file) as f:
-                        logger.debug("AnsibleInventory: reading var file %r", vars_file)
+                        LOG.debug("AnsibleInventory: reading var file %r", vars_file)
                         return cast(Dict[str, Any], YAML.load(f))
-            logger.debug(
+            LOG.debug(
                 "AnsibleInventory: no vars file was found with the path %r "
                 "and one of the supported extensions: %s",
                 vars_file_base,
@@ -320,7 +308,7 @@ class YAMLParser(AnsibleParser):
             self.original_data = cast(AnsibleGroupsDict, YAML.load(f))
 
 
-def parse(hostsfile: str) -> Tuple[HostsDict, GroupsDict, DefaultsDict]:
+def parse(hostsfile: str) -> Tuple[Hosts, Groups, Defaults]:
     """
     Parse provided inventory file
 
@@ -334,7 +322,7 @@ def parse(hostsfile: str) -> Tuple[HostsDict, GroupsDict, DefaultsDict]:
         try:
             parser = YAMLParser(hostsfile)
         except (ScannerError, ComposerError):
-            logger.error("AnsibleInventory: file %r is not INI or YAML file", hostsfile)
+            LOG.error("AnsibleInventory: file %r is not INI or YAML file", hostsfile)
             raise NornirNoValidInventoryError(
                 f"AnsibleInventory: no valid inventory source(s) to parse. Tried: {hostsfile}"
             )
