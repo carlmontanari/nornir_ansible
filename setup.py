@@ -28,6 +28,6 @@ setuptools.setup(
     python_requires=">=3.6",
     entry_points="""
     [nornir.plugins.inventory]
-    AnsibleInventory=nornir_ansible.inventory:AnsibleInventory
+    AnsibleInventory=nornir_ansible.plugins.inventory:AnsibleInventory
     """,
 )

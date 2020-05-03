@@ -5,7 +5,7 @@ import ruamel.yaml
 from nornir.core.exceptions import NornirNoValidInventoryError
 from nornir_utils.plugins.inventory import simple
 
-from nornir_ansible.inventory import ansible
+from nornir_ansible.plugins.inventory import ansible
 
 BASE_PATH = os.path.join(os.path.dirname(__file__), "ansible")
 
