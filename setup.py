@@ -9,7 +9,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="nornir_ansible",
-    version="2020.04.11",
+    version="2020.05.03",
     author=__author__,
     author_email="carl.r.montanari@gmail.com",
     description="",
@@ -17,7 +17,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/carlmontanari/nornir_ansible",
     packages=setuptools.find_packages(),
-    install_requires=["mypy_extensions>=0.4.1", "ruamel.yaml>=0.16.10", "nornir>=2.4.0"],
+    install_requires=["mypy_extensions>=0.4.1", "ruamel.yaml>=0.16.10", "nornir==3.0.0a2"],
     extras_require={},
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -26,5 +26,8 @@ setuptools.setup(
         "Programming Language :: Python :: 3.8",
     ],
     python_requires=">=3.6",
-    entry_points={"AnsibleInventory": "AnsibleInventory=nornir_ansible.inventory"},
+    entry_points="""
+    [nornir.plugins.inventory]
+    AnsibleInventory=nornir_ansible.inventory:AnsibleInventory
+    """,
 )

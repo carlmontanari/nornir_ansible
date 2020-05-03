@@ -14,7 +14,7 @@ def nornir(request):
 
     nornir = InitNornir(
         inventory={
-            "plugin": "nornir_ansible.inventory.ansible.AnsibleInventory",
+            "plugin": "AnsibleInventory",
             "options": {
                 "host_file": "{}/inventory_data/hosts.yaml".format(dir_path),
                 "group_file": "{}/inventory_data/groups.yaml".format(dir_path),
