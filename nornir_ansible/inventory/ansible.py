@@ -23,7 +23,7 @@ from ruamel.yaml.composer import ComposerError
 from ruamel.yaml.scanner import ScannerError
 
 VARS_FILENAME_EXTENSIONS = ["", ".ini", ".yml", ".yaml"]
-RESERVED_FIELDS = ("hostname", "port", "username", "password", "platform")
+RESERVED_FIELDS = ("hostname", "port", "username", "password", "platform", "connection_options")
 YAML = ruamel.yaml.YAML(typ="safe")
 LOG = logging.getLogger(__name__)
 
@@ -142,9 +142,10 @@ class AnsibleParser:
                 host["data"][k] = v
         for field in RESERVED_FIELDS:
             if field not in host:
-                host[field] = None
-        if "connection_options" not in host:
-            host["connection_options"] = {}
+                if field == "connection_options":
+                    host[field] = {}
+                else:
+                    host[field] = None
 
     def sort_groups(self) -> None:
         """Sort group data"""
@@ -349,7 +350,7 @@ def _get_connection_options(data: Dict[str, Any]) -> ConnectionOptions:
     Get connection option information for a given host/group
 
     Arguments:
-        data: TODO
+        data: dictionary of connection options for host/group
 
     """
     connection_options = {}
@@ -370,7 +371,7 @@ def _get_defaults(data: Dict[str, Any]) -> Defaults:
     Get defaults information for a given host/group
 
     Arguments:
-        data: TODO
+        data: dictionary of defaults data
 
     """
     return Defaults(
@@ -391,7 +392,7 @@ def _get_inventory_element(
     Get inventory information for a given host/group
 
     Arguments:
-        data: TODO
+        data: dictionary of host or group data to serialize
 
     """
     return typ(
