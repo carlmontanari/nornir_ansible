@@ -3,7 +3,7 @@ import os
 import pytest
 import ruamel.yaml
 from nornir.core.exceptions import NornirNoValidInventoryError
-from nornir_utils.plugins.inventory import simple
+from nornir_utils.plugins.inventory import YAMLInventory
 
 from nornir_ansible.plugins.inventory import ansible
 
@@ -38,7 +38,7 @@ class Test(object):
         assert inv.defaults == expected_defaults
 
         serialized_inv = inv.load()
-        control_inv = simple.SimpleInventory(
+        control_inv = YAMLInventory(
             host_file=expected_hosts_file,
             group_file=expected_groups_file,
             defaults_file=expected_defaults_file,

@@ -8,5 +8,5 @@ pylama>=7.7.1
 pycodestyle>=2.5.0
 pydocstyle>=5.0.2
 pylint>=2.5.0
-nornir_utils>=0.1.0a0
+nornir_utils>=0.1.0a1
 -r requirements.txt
