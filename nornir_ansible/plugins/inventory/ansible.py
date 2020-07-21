@@ -4,7 +4,7 @@ import logging
 import os
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, DefaultDict, Dict, MutableMapping, Optional, Tuple, Type, Union, cast
+from typing import Any, DefaultDict, Dict, List, MutableMapping, Optional, Tuple, Type, Union, cast
 
 import ruamel.yaml
 from mypy_extensions import TypedDict
@@ -81,7 +81,20 @@ class AnsibleParser:
             dest_group["groups"].append(parent)
 
         group_data = data.get("vars", {})
-        vars_file_data = self.read_vars_file(group_file, self.path, False) or {}
+
+        vars_file_data = {}
+        if self._vars_file_exists(f"{self.path}/group_vars/{group_file}"):
+            vars_file_data = self.read_vars_file(
+                element=group_file, path=self.path, is_host=False, is_dir=False
+            )
+        elif Path(f"{self.path}/group_vars/{group_file}").is_dir():
+            for file in self._get_all_files(f"{self.path}/group_vars/{group_file}"):
+                t_vars_file_data = self.read_vars_file(
+                    element=group_file, path=file, is_host=False, is_dir=True,
+                )
+                if isinstance(t_vars_file_data, dict):
+                    vars_file_data = {**t_vars_file_data, **vars_file_data}
+
         self.normalize_data(dest_group, group_data, vars_file_data)
         self.map_nornir_vars(dest_group)
 
@@ -111,9 +124,63 @@ class AnsibleParser:
             if parent and parent != "defaults":
                 self.hosts[host]["groups"].append(parent)
 
-            vars_file_data = self.read_vars_file(host, self.path, True)
+            vars_file_data = {}
+            if self._vars_file_exists(f"{self.path}/host_vars/{host}"):
+                vars_file_data = self.read_vars_file(
+                    element=host, path=self.path, is_host=True, is_dir=False
+                )
+
+            elif Path(f"{self.path}/host_vars/{host}").is_dir():
+                vars_file_data = {}
+                for file in self._get_all_files(f"{self.path}/host_vars/{host}"):
+                    t_vars_file_data = self.read_vars_file(
+                        element=host, path=file, is_host=True, is_dir=True,
+                    )
+                    if isinstance(t_vars_file_data, dict):
+                        vars_file_data = {**t_vars_file_data, **vars_file_data}
+
             self.normalize_data(self.hosts[host], data, vars_file_data)
             self.map_nornir_vars(self.hosts[host])
+
+    @staticmethod
+    def _get_all_files(path: str) -> List[str]:
+        """
+        Get all files with VARS_FILENAME_EXTENSIONS, contains in path/ and subdirectories
+
+        Args:
+            path: Path to directory
+
+        Returns:
+            files_lst: List of files that are in this directory and subdirectories
+
+        """
+        files_lst = list()
+        for root, _, files in os.walk(f"{path}"):
+            for file in files:
+                if (
+                    Path(file).suffix in VARS_FILENAME_EXTENSIONS
+                    and Path(f"{root}/{file}").is_file()
+                ):
+                    files_lst.append(f"{root}/{file}")
+
+        return files_lst
+
+    @staticmethod
+    def _vars_file_exists(path: str) -> bool:
+        """
+        With VARS_FILENAME_EXTENSIONS, check if the file given in parameter exists.
+
+        Args:
+            path: Path to file (without extension)
+
+        Returns:
+            bool: True if a file exists with of of the extension
+
+        """
+        for ext in VARS_FILENAME_EXTENSIONS:
+            if os.path.isfile(f"{path}{ext}"):
+                return True
+        return False
 
     def normalize_data(self, host: Hosts, data: Dict[str, Any], vars_data: Dict[str, Any]) -> None:
         """
@@ -159,7 +226,9 @@ class AnsibleParser:
             group["groups"].sort()
 
     @staticmethod
-    def read_vars_file(element: str, path: str, is_host: bool = True) -> VarsDict:
+    def read_vars_file(
+        element: str, path: str, is_host: bool = True, is_dir: bool = False
+    ) -> VarsDict:
         """
         Read vars file data, return `VarsDict`
 
@@ -167,11 +236,20 @@ class AnsibleParser:
             element: inventory element being parsed, i.e. name of host or group being parsed
             path: parent directory of inventory file
             is_host: bool indicating if reading a host vars file or if false a group vars file
+            is_dir: bool indicating if variables are defined in a directory
 
         """
         sub_dir = "host_vars" if is_host else "group_vars"
         vars_dir = Path(path) / sub_dir
-        if vars_dir.is_dir():
+
+        if is_dir:
+            with open(path) as f:
+                for ext in VARS_FILENAME_EXTENSIONS:
+                    if Path(f"{path}{ext}").is_file():
+                        LOG.debug("AnsibleInventory: reading var file %r", path)
+                        return cast(Dict[str, Any], YAML.load(f))
+
+        elif vars_dir.is_dir():
             vars_file_base = vars_dir / element
             for extension in VARS_FILENAME_EXTENSIONS:
                 vars_file = vars_file_base.with_suffix(vars_file_base.suffix + extension)
