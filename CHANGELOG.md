@@ -1,6 +1,9 @@
 CHANGELOG
 =======
 
+# 2020.07.20
+- Added support for variables defined in directories courtesy of [Dylan Hamel](https://github.com/DylanHamel) 
+
 # 2020.05.03
 - Fixing registration via entrypoint
 - Fix imports from cleaned up Nornir core (hosts/groups/etc. -- mostly vars for typing purposes)
