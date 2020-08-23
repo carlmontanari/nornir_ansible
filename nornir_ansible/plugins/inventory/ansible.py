@@ -414,11 +414,11 @@ def parse(hostsfile: str) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any
     except cp.Error:
         try:
             parser = YAMLParser(hostsfile)
-        except (ScannerError, ComposerError):
+        except (ScannerError, ComposerError) as exc:
             LOG.error("AnsibleInventory: file %r is not INI or YAML file", hostsfile)
             raise NornirNoValidInventoryError(
                 f"AnsibleInventory: no valid inventory source(s) to parse. Tried: {hostsfile}"
-            )
+            ) from exc
     parser.parse()
     return parser.hosts, parser.groups, parser.defaults
 
