@@ -90,7 +90,10 @@ class AnsibleParser:
         elif Path(f"{self.path}/group_vars/{group_file}").is_dir():
             for file in self._get_all_files(f"{self.path}/group_vars/{group_file}"):
                 t_vars_file_data = self.read_vars_file(
-                    element=group_file, path=file, is_host=False, is_dir=True,
+                    element=group_file,
+                    path=file,
+                    is_host=False,
+                    is_dir=True,
                 )
                 if isinstance(t_vars_file_data, dict):
                     vars_file_data = {**t_vars_file_data, **vars_file_data}
@@ -134,7 +137,10 @@ class AnsibleParser:
                 vars_file_data = {}
                 for file in self._get_all_files(f"{self.path}/host_vars/{host}"):
                     t_vars_file_data = self.read_vars_file(
-                        element=host, path=file, is_host=True, is_dir=True,
+                        element=host,
+                        path=file,
+                        is_host=True,
+                        is_dir=True,
                     )
                     if isinstance(t_vars_file_data, dict):
                         vars_file_data = {**t_vars_file_data, **vars_file_data}
@@ -488,7 +494,10 @@ def _get_inventory_element(
 
 
 class AnsibleInventory:
-    def __init__(self, hostsfile: str = "hosts",) -> None:
+    def __init__(
+        self,
+        hostsfile: str = "hosts",
+    ) -> None:
         """
         Ansible Inventory plugin supporting ini and yaml inventory sources.
 
