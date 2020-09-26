@@ -1,7 +1,6 @@
 """nornir_ansible.inventory.ansible"""
 import configparser as cp
 import logging
-import os
 from collections import defaultdict
 from pathlib import Path
 from typing import Any, DefaultDict, Dict, List, MutableMapping, Optional, Tuple, Type, Union, cast
@@ -49,7 +48,7 @@ class AnsibleParser:
 
         """
         self.hostsfile = hostsfile
-        self.path = os.path.dirname(hostsfile)
+        self.path = str(Path(hostsfile).absolute().parents[0])
         self.hosts: Dict[str, Any] = {}
         self.groups: Dict[str, Any] = {}
         self.defaults: Dict[str, Any] = {"data": {}}
@@ -160,16 +159,13 @@ class AnsibleParser:
             files_lst: List of files that are in this directory and subdirectories
 
         """
-        files_lst = list()
-        for root, _, files in os.walk(f"{path}"):
-            for file in files:
-                if (
-                    Path(file).suffix in VARS_FILENAME_EXTENSIONS
-                    and Path(f"{root}/{file}").is_file()
-                ):
-                    files_lst.append(f"{root}/{file}")
+        files_list = [
+            str(file)
+            for file in Path(path).rglob("*")
+            if Path(file).suffix in VARS_FILENAME_EXTENSIONS and Path(file).is_file()
+        ]
 
-        return files_lst
+        return files_list
 
     @staticmethod
     def _vars_file_exists(path: str) -> bool:
@@ -184,7 +180,7 @@ class AnsibleParser:
 
         """
         for ext in VARS_FILENAME_EXTENSIONS:
-            if os.path.isfile(f"{path}{ext}"):
+            if Path(f"{path}{ext}").is_file():
                 return True
         return False
 
