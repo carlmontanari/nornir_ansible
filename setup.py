@@ -17,7 +17,11 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/carlmontanari/nornir_ansible",
     packages=setuptools.find_packages(),
-    install_requires=["mypy_extensions>=0.4.1,<1.0.0", "ruamel.yaml>=0.16.10,<1.0.0", "nornir>=3.0.0a4,<4.0.0"],
+    install_requires=[
+        "mypy_extensions>=0.4.1,<1.0.0",
+        "ruamel.yaml>=0.16.10,<1.0.0",
+        "nornir>=3.0.0a4,<4.0.0",
+    ],
     extras_require={},
     classifiers=[
         "Programming Language :: Python :: 3",
