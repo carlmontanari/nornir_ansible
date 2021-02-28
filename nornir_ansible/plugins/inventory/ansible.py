@@ -14,7 +14,6 @@ from nornir.core.inventory import (
     Group,
     Host,
     HostOrGroup,
-    Hosts,
     Inventory,
     ParentGroups,
 )
@@ -184,7 +183,9 @@ class AnsibleParser:
                 return True
         return False
 
-    def normalize_data(self, host: Hosts, data: Dict[str, Any], vars_data: Dict[str, Any]) -> None:
+    def normalize_data(
+        self, host: Dict[str, Any], data: Dict[str, Any], vars_data: Dict[str, Any]
+    ) -> None:
         """
         Parse inventory hosts
 
@@ -425,7 +426,7 @@ def parse(hostsfile: str) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any
     return parser.hosts, parser.groups, parser.defaults
 
 
-def _get_connection_options(data: Dict[str, Any]) -> ConnectionOptions:
+def _get_connection_options(data: Dict[str, Any]) -> Dict[str, ConnectionOptions]:
     """
     Get connection option information for a given host/group
 
@@ -520,13 +521,15 @@ class AnsibleInventory:
             )
 
         for h in serialized_hosts.values():
-            h.groups = ParentGroups([serialized_groups[g] for g in h.groups])
+            h.groups = ParentGroups([serialized_groups[g] for g in h.groups])  # type: ignore
 
         for g in serialized_groups.values():
-            g.groups = ParentGroups([serialized_groups[g] for g in g.groups])
+            g.groups = ParentGroups([serialized_groups[g] for g in g.groups])  # type: ignore
 
         return Inventory(
-            hosts=serialized_hosts, groups=serialized_groups, defaults=serialized_defaults
+            hosts=serialized_hosts,  # type: ignore
+            groups=serialized_groups,  # type: ignore
+            defaults=serialized_defaults,
         )
 
     def dict(self) -> Dict[str, Any]:
