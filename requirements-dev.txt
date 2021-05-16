@@ -1,9 +1,9 @@
 tox==3.23.1
-black==21.5b0
+black==21.5b1
 isort==5.8.0
 mypy==0.812
 pytest==6.2.4
-pytest-cov==2.11.1
+pytest-cov==2.12.0
 pylama==7.7.1
 pycodestyle==2.7.0
 pydocstyle==6.0.0
