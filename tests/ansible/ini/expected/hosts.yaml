@@ -2,8 +2,8 @@ bar.example.com:
   connection_options: {}
   data: {}
   groups:
-  - webservers
-  hostname: null
+    - webservers
+  hostname: bar.example.com
   password: null
   platform: null
   port: null
@@ -12,9 +12,9 @@ foo.example.com:
   connection_options: {}
   data: {}
   groups:
-  - frontend
-  - webservers
-  hostname: null
+    - frontend
+    - webservers
+  hostname: foo.example.com
   password: null
   platform: null
   port: null
@@ -24,8 +24,8 @@ one.example.com:
   data:
     my_var: from_one.example.com
   groups:
-  - dbservers
-  hostname: null
+    - dbservers
+  hostname: one.example.com
   password: null
   platform: null
   port: null
@@ -34,7 +34,7 @@ three.example.com:
   connection_options: {}
   data: {}
   groups:
-  - dbservers
+    - dbservers
   hostname: 192.0.2.50
   password: null
   platform: null
@@ -46,7 +46,7 @@ two.example.com:
     my_var: from_hostfile
     whatever: asdasd
   groups:
-  - dbservers
+    - dbservers
   hostname: null
   password: null
   platform: null
