@@ -333,12 +333,12 @@ class INIParser(AnsibleParser):
         """
         result: VarsDict = {}
 
-        if not content:
-            return result
-
-        for option in content.split():
-            key, value = option.split("=")
-            result[key] = INIParser.normalize_value(value)
+        if "=" in content:
+            for option in content.split():
+                key, value = option.split("=")
+                result[key] = INIParser.normalize_value(value)
+        else:
+            result["ansible_host"] = INIParser.normalize_value(content)
         return result
 
     @staticmethod
@@ -385,9 +385,13 @@ class INIParser(AnsibleParser):
                 else:
                     groups[group_name][meta] = subsection
             else:
-                groups[section_name]["hosts"] = {
-                    host: self.normalize_content(host_vars) for host, host_vars in section.items()
-                }
+                groups[section_name]["hosts"] = dict()
+                for host, host_vars in section.items():
+                    if host_vars == None:
+                        groups[section_name]["hosts"][host] = self.normalize_content(host)
+                    else:
+                        groups[section_name]["hosts"][host] = self.normalize_content(host_vars)
+
         return cast(AnsibleGroupsDict, result)
 
     def load_hosts_file(self) -> None:

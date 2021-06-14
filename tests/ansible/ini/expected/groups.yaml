@@ -4,7 +4,7 @@ dbservers:
     my_var: from_dbservers
     my_yet_another_var: from_dbservers
   groups:
-  - servers
+    - servers
   hostname: null
   password: null
   platform: null
@@ -36,7 +36,16 @@ webservers:
   connection_options: {}
   data: {}
   groups:
-  - servers
+    - servers
+  hostname: null
+  password: null
+  platform: null
+  port: null
+  username: null
+backend:
+  connection_options: {}
+  data: {}
+  groups: []
   hostname: null
   password: null
   platform: null

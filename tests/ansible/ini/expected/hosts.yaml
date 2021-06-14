@@ -52,3 +52,23 @@ two.example.com:
   platform: null
   port: null
   username: null
+172.16.1.1:
+  connection_options: {}
+  data: {}
+  groups:
+    - backend
+  hostname: 172.16.1.1
+  password: null
+  platform: null
+  port: null
+  username: null
+172.16.1.2:
+  connection_options: {}
+  data: {}
+  groups:
+    - backend
+  hostname: 172.16.1.2
+  password: null
+  platform: null
+  port: null
+  username: null

@@ -10,6 +10,10 @@ three.example.com ansible_port=5555 ansible_host=192.0.2.50
 [frontend]
 foo.example.com
 
+[backend]
+172.16.1.1
+172.16.1.2
+
 [servers:children]
 webservers
 dbservers
