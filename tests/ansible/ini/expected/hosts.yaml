@@ -3,7 +3,7 @@ bar.example.com:
   data: {}
   groups:
   - webservers
-  hostname: null
+  hostname: bar.example.com
   password: null
   platform: null
   port: null
@@ -14,7 +14,7 @@ foo.example.com:
   groups:
   - frontend
   - webservers
-  hostname: null
+  hostname: foo.example.com
   password: null
   platform: null
   port: null
@@ -25,7 +25,7 @@ one.example.com:
     my_var: from_one.example.com
   groups:
   - dbservers
-  hostname: null
+  hostname: one.example.com
   password: null
   platform: null
   port: null
@@ -47,7 +47,7 @@ two.example.com:
     whatever: asdasd
   groups:
   - dbservers
-  hostname: null
+  hostname: two.example.com
   password: null
   platform: null
   port: null

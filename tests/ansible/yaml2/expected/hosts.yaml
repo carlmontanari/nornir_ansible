@@ -2,7 +2,7 @@ one.example.com:
   connection_options: {}
   data: {}
   groups: []
-  hostname: null
+  hostname: one.example.com
   password: null
   platform: null
   port: null
@@ -21,7 +21,7 @@ two.example.com:
   data:
     my_var: from_hostfile
   groups: []
-  hostname: null
+  hostname: two.example.com
   password: null
   platform: null
   port: null
