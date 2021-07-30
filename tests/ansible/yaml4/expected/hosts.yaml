@@ -6,7 +6,7 @@ lab_a_router_02:
         ip: 1.2.3.4/32
   groups:
   - eric_eccli
-  hostname: null
+  hostname: lab_a_router_02
   password: null
   platform: null
   port: null
@@ -19,7 +19,7 @@ lab_a_router_01:
         ip: 4.3.2.1/32
   groups:
     - iosxr
-  hostname: null
+  hostname: lab_a_router_01
   password: null
   platform: null
   port: null

@@ -143,7 +143,7 @@ class AnsibleParser:
                     if isinstance(t_vars_file_data, dict):
                         vars_file_data = {**t_vars_file_data, **vars_file_data}
 
-            self.normalize_data(self.hosts[host], data, vars_file_data)
+            self.normalize_data(self.hosts[host], data, vars_file_data, host)
             self.map_nornir_vars(self.hosts[host])
 
     @staticmethod
@@ -184,7 +184,11 @@ class AnsibleParser:
         return False
 
     def normalize_data(
-        self, host: Dict[str, Any], data: Dict[str, Any], vars_data: Dict[str, Any]
+        self,
+        host_or_group: Dict[str, Any],
+        data: Dict[str, Any],
+        vars_data: Dict[str, Any],
+        hostname: Optional[str] = None,
     ) -> None:
         """
         Parse inventory hosts
@@ -193,7 +197,7 @@ class AnsibleParser:
         depending on which section of the inventory file is being currently parsed
 
         Arguments:
-            host: dict of hosts
+            host_or_group: dict of host or group data
             data: dict of vars to parse
             vars_data: dict of vars to parse
 
@@ -201,21 +205,23 @@ class AnsibleParser:
         self.map_nornir_vars(data)
         for k, v in data.items():
             if k in RESERVED_FIELDS:
-                host[k] = v
+                host_or_group[k] = v
             else:
-                host["data"][k] = v
+                host_or_group["data"][k] = v
         self.map_nornir_vars(vars_data)
         for k, v in vars_data.items():
             if k in RESERVED_FIELDS:
-                host[k] = v
+                host_or_group[k] = v
             else:
-                host["data"][k] = v
+                host_or_group["data"][k] = v
         for field in RESERVED_FIELDS:
-            if field not in host:
+            if field not in host_or_group:
                 if field == "connection_options":
-                    host[field] = {}
+                    host_or_group[field] = {}
+                elif field == "hostname" and hostname is not None:
+                    host_or_group[field] = hostname
                 else:
-                    host[field] = None
+                    host_or_group[field] = None
 
     def sort_groups(self) -> None:
         """Sort group data"""

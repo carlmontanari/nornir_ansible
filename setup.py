@@ -9,7 +9,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="nornir_ansible",
-    version="2020.09.26",
+    version="2021.07.30",
     author=__author__,
     author_email="carl.r.montanari@gmail.com",
     description="",
