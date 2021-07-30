@@ -1,8 +1,8 @@
 CHANGELOG
 =======
 
-# 2020X.XX.XX
-- ???
+# 2021.07.30
+- Added support for hosts in inventory that only have an IP address and no "ansible_host" field -- see #47
 
 
 # 2020.09.26
