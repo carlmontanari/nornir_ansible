@@ -5,7 +5,7 @@ mypy==0.910
 pytest==6.2.5
 pytest-cov==3.0.0
 pylama==7.7.1
-pycodestyle==2.7.0
+pycodestyle==2.8.0
 pydocstyle==6.1.1
 pylint==2.11.1
 nornir_utils>=0.1.0
