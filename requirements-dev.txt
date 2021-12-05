@@ -4,9 +4,10 @@ isort==5.10.1
 mypy==0.910
 pytest==6.2.5
 pytest-cov==3.0.0
-pylama==7.7.1
+pylama==7.7.1 ; python_version < "3.7"
+pylama==8.2.1 ; python_version >= "3.7"
+pylint==2.12.2
 pycodestyle==2.8.0
 pydocstyle==6.1.1
-pylint==2.12.1
 nornir_utils>=0.1.0
 -r requirements.txt
