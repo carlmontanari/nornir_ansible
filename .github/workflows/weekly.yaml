@@ -16,10 +16,10 @@ jobs:
         version: ["3.7", "3.8", "3.9", "3.10"]
     steps:
       - uses: actions/checkout@v1
-      - name: set up python ${{ matrix.python-version }}
+      - name: set up python ${{ matrix.version }}
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.version }}
       - name: setup test env
         run: |
           python -m pip install --upgrade pip
