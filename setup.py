@@ -9,7 +9,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setuptools.setup(
     name="nornir_ansible",
-    version="2021.07.30",
+    version="2022.01.30",
     author=__author__,
     author_email="carl.r.montanari@gmail.com",
     description="",
@@ -29,6 +29,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
     python_requires=">=3.6",
     entry_points="""

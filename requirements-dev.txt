@@ -1,13 +1,13 @@
 tox==3.24.5
 black==22.1.0
-isort==5.10.1
+isort>=5.10.1,<6.0.0
 mypy==0.931
-pytest==6.2.5
-pytest-cov==3.0.0
+pytest-cov>=3.0.0,<4.0.0
+pytest>=6.2.5,<7.0.0
 pylama==7.7.1 ; python_version < "3.7"
-pylama==8.3.7 ; python_version >= "3.7"
+pylama==8.3.7,<9.0.0 ; python_version >= "3.7"
 pylint==2.12.2
-pycodestyle==2.8.0
-pydocstyle==6.1.1
+pycodestyle==2.8.0,<3.0.0
+pydocstyle==6.1.1,<7.0.0
 nornir_utils>=0.1.0
 -r requirements.txt
