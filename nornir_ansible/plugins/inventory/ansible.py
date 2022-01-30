@@ -252,7 +252,7 @@ class AnsibleParser:
         vars_dir = Path(path) / sub_dir
 
         if is_dir:
-            with open(path) as f:
+            with open(path, "r", encoding="utf-8") as f:
                 for ext in VARS_FILENAME_EXTENSIONS:
                     if Path(f"{path}{ext}").is_file():
                         LOG.debug("AnsibleInventory: reading var file %r", path)
@@ -263,7 +263,7 @@ class AnsibleParser:
             for extension in VARS_FILENAME_EXTENSIONS:
                 vars_file = vars_file_base.with_suffix(vars_file_base.suffix + extension)
                 if vars_file.is_file():
-                    with open(vars_file) as f:
+                    with open(vars_file, "r", encoding="utf-8") as f:
                         LOG.debug("AnsibleInventory: reading var file %r", vars_file)
                         return cast(Dict[str, Any], YAML.load(f))
             LOG.debug(
@@ -406,7 +406,7 @@ class INIParser(AnsibleParser):
 class YAMLParser(AnsibleParser):
     def load_hosts_file(self) -> None:
         """Parse host specific inventory files"""
-        with open(self.hostsfile, "r") as f:
+        with open(self.hostsfile, "r", encoding="utf-8") as f:
             self.original_data = cast(AnsibleGroupsDict, YAML.load(f))
 
 
