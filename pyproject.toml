@@ -4,7 +4,7 @@ target-version = ['py311']
 
 [tool.pylama]
 linters = "mccabe,pycodestyle,pylint"
-skip = "tests/*,.tox/*,venv/*,build/*,private/*,examples/*,"
+skip = "tests/*,.tox/*,venv/*,build/*,private/*,examples/*"
 
 [tool.pylama.pycodestyle]
 max_line_length = 100
