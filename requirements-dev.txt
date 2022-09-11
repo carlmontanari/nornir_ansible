@@ -10,4 +10,6 @@ pylint==2.15.0
 pycodestyle>=2.8.0,<3.0.0
 pydocstyle==6.1.1,<7.0.0
 nornir_utils>=0.1.0
+# toml for parsing pyproject.toml for dev deps
+toml>=0.10.2,<1.0.0
 -r requirements.txt
