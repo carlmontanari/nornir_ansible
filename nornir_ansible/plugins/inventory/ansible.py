@@ -379,7 +379,6 @@ class INIParser(AnsibleParser):
         result: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]] = {"all": {"children": groups}}
 
         for section_name, section in data.items():
-
             if section_name == "DEFAULT":
                 continue
 
