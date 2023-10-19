@@ -1,0 +1,20 @@
+lab_a_router_02:
+  connection_options: {}
+  data: {}
+  groups:
+  - eric_eccli
+  hostname: lab_a_router_02
+  password: null
+  platform: null
+  port: null
+  username: null
+lab_a_router_01:
+  connection_options: {}
+  data: {}
+  groups:
+    - iosxr
+  hostname: lab_a_router_01
+  password: null
+  platform: null
+  port: null
+  username: null

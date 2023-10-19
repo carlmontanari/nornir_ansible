@@ -1,0 +1,18 @@
+eric_eccli:
+  connection_options: {}
+  data: {}
+  groups: []
+  hostname: null
+  password: null
+  platform: null
+  port: null
+  username: null
+iosxr:
+  connection_options: {}
+  data: {} 
+  groups: []
+  hostname: null
+  password: null
+  platform: null
+  port: null
+  username: null

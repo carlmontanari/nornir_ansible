@@ -2,6 +2,7 @@
 import configparser as cp
 import logging
 from collections import defaultdict
+from io import TextIOWrapper
 from pathlib import Path
 from typing import Any, DefaultDict, Dict, List, MutableMapping, Optional, Tuple, Type, Union, cast
 
@@ -255,8 +256,8 @@ class AnsibleParser:
             with open(path, "r", encoding="utf-8") as f:
                 for ext in VARS_FILENAME_EXTENSIONS:
                     if Path(f"{path}{ext}").is_file():
-                        LOG.debug("AnsibleInventory: reading var file %r", path)
-                        return cast(Dict[str, Any], YAML.load(f))
+                        LOG.debug("AnsibleInventory: is_dir reading var file %r", path)
+                        return _load_yaml(f)
 
         elif vars_dir.is_dir():
             vars_file_base = vars_dir / element
@@ -265,7 +266,7 @@ class AnsibleParser:
                 if vars_file.is_file():
                     with open(vars_file, "r", encoding="utf-8") as f:
                         LOG.debug("AnsibleInventory: reading var file %r", vars_file)
-                        return cast(Dict[str, Any], YAML.load(f))
+                        return _load_yaml(f)
             LOG.debug(
                 "AnsibleInventory: no vars file was found with the path %r "
                 "and one of the supported extensions: %s",
@@ -468,6 +469,37 @@ def _get_defaults(data: Dict[str, Any]) -> Defaults:
         platform=data.get("platform"),
         data=data.get("data"),
         connection_options=_get_connection_options(data.get("connection_options", {})),
+    )
+
+
+def _load_yaml(file_stream: TextIOWrapper) -> VarsDict:
+    """
+    Read vars YAML file data, return `VarsDict`
+
+    Arguments:
+        file_stream: opend file stream
+
+    """
+    try:
+        data = YAML.load(file_stream)
+    except (ScannerError, ComposerError) as exc:
+        LOG.error("AnsibleInventory: file %r is a valid YAML file", file_stream.name)
+        raise NornirNoValidInventoryError(
+            f"AnsibleInventory: no valid YAML file. Tried: {file_stream.name}"
+        ) from exc
+
+    if isinstance(data, dict):
+        return data
+    if data is None:
+        LOG.warning("AnsibleInventory: file %r is empty", file_stream.name)
+        return {}
+    LOG.error(
+        "AnsibleInventory: file %r does not return a dictionary. Got: %s",
+        file_stream.name,
+        type(data),
+    )
+    raise NornirNoValidInventoryError(
+        f"AnsibleInventory: file {file_stream.name} does not return a dictionary. Got: {type(data)}"
     )
 
 
