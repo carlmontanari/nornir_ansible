@@ -483,7 +483,7 @@ def _load_yaml(file_stream: TextIOWrapper) -> VarsDict:
     try:
         data = YAML.load(file_stream)
     except (ScannerError, ComposerError) as exc:
-        LOG.error("AnsibleInventory: file %r is a valid YAML file", file_stream.name)
+        LOG.error("AnsibleInventory: file %r is not a valid YAML file", file_stream.name)
         raise NornirNoValidInventoryError(
             f"AnsibleInventory: no valid YAML file. Tried: {file_stream.name}"
         ) from exc
