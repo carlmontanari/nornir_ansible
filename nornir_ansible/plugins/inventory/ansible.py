@@ -4,10 +4,21 @@ import logging
 from collections import defaultdict
 from io import TextIOWrapper
 from pathlib import Path
-from typing import Any, DefaultDict, Dict, List, MutableMapping, Optional, Tuple, Type, Union, cast
+from typing import (
+    Any,
+    DefaultDict,
+    Dict,
+    List,
+    MutableMapping,
+    Optional,
+    Tuple,
+    Type,
+    TypedDict,
+    Union,
+    cast,
+)
 
 import ruamel.yaml
-from mypy_extensions import TypedDict
 from nornir.core.exceptions import NornirNoValidInventoryError
 from nornir.core.inventory import (
     ConnectionOptions,
