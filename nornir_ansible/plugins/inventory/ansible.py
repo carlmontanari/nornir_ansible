@@ -1,4 +1,5 @@
 """nornir_ansible.inventory.ansible"""
+
 import configparser as cp
 import logging
 from collections import defaultdict
