@@ -19,6 +19,8 @@ from typing import (
     cast,
 )
 
+import re, os
+
 import ruamel.yaml
 from nornir.core.exceptions import NornirNoValidInventoryError
 from nornir.core.inventory import (
@@ -94,7 +96,7 @@ class AnsibleParser:
         group_data = data.get("vars", {})
 
         vars_file_data = {}
-        if self._vars_file_exists(f"{self.path}/group_vars/{group_file}"):
+        if self._vars_file_exists(f"{self.path}/group_vars/", f"{group_file}"):
             vars_file_data = self.read_vars_file(
                 element=group_file, path=self.path, is_host=False, is_dir=False
             )
@@ -139,9 +141,10 @@ class AnsibleParser:
                 self.hosts[host]["groups"].append(parent)
 
             vars_file_data = {}
-            if self._vars_file_exists(f"{self.path}/host_vars/{host}"):
+            exist = self._vars_file_exists(f"{self.path}/host_vars/", f"{host}")
+            if exist:
                 vars_file_data = self.read_vars_file(
-                    element=host, path=self.path, is_host=True, is_dir=False
+                    element=exist, path=self.path, is_host=True, is_dir=False
                 )
 
             elif Path(f"{self.path}/host_vars/{host}").is_dir():
@@ -180,7 +183,7 @@ class AnsibleParser:
         return files_list
 
     @staticmethod
-    def _vars_file_exists(path: str) -> bool:
+    def _vars_file_exists(path: str, host: str) -> str:
         """
         With VARS_FILENAME_EXTENSIONS, check if the file given in parameter exists.
 
@@ -191,10 +194,17 @@ class AnsibleParser:
             bool: True if a file exists with of of the extension
 
         """
-        for ext in VARS_FILENAME_EXTENSIONS:
-            if Path(f"{path}{ext}").is_file():
-                return True
-        return False
+        if not Path(f"{path}{host}").is_dir():
+          exts = '|'.join(map(str,VARS_FILENAME_EXTENSIONS))
+          pattern = re.compile(r'.*{}({})$'.format(re.escape(host), exts), re.IGNORECASE)
+          found_files = [f for f in os.listdir(path) if pattern.search(f)]
+          if len(found_files) > 1:
+            raise Exception("More than one file found")
+          if len(found_files) == 1:
+            if Path(f"{path}{found_files[0]}").is_file():
+              return found_files[0]
+          else:
+            return None
 
     def normalize_data(
         self,
@@ -392,6 +402,7 @@ class INIParser(AnsibleParser):
         result: Dict[str, Dict[str, Dict[str, Dict[str, Any]]]] = {"all": {"children": groups}}
 
         for section_name, section in data.items():
+
             if section_name == "DEFAULT":
                 continue
 
