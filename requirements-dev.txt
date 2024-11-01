@@ -2,7 +2,7 @@ tox>=3.24.5,<5.0.0
 black==24.8.0
 isort>=5.10.1,<6.0.0
 mypy==1.13.0
-pytest-cov>=3.0.0,<6.0.0
+pytest-cov>=3.0.0,<7.0.0
 pytest>=6.2.5,<9.0.0
 pylama==7.7.1 ; python_version < "3.7"
 pylama>=8.3.7,<9.0.0 ; python_version >= "3.7"
