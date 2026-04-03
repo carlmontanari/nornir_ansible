@@ -80,8 +80,9 @@ class AnsibleParser:
 
         """
         data = data or {}
-        if group == "defaults":
+        if group == "defaults" or group == "all":
             group_file = "all"
+            group = "defaults"
             dest_group = self.defaults
         else:
             self.add(group, self.groups)
@@ -120,7 +121,7 @@ class AnsibleParser:
     def parse(self) -> None:
         """Parse inventory entrypoint"""
         if self.original_data is not None:
-            self.parse_group("defaults", self.original_data["all"])
+            self.parse_group("defaults", {'children': self.original_data})
         self.sort_groups()
 
     def parse_hosts(self, hosts: AnsibleHostsDict, parent: Optional[str] = None) -> None:
