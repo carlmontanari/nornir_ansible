@@ -33,7 +33,7 @@ from nornir.core.inventory import (
 from ruamel.yaml.composer import ComposerError
 from ruamel.yaml.scanner import ScannerError
 
-VARS_FILENAME_EXTENSIONS = ["", ".ini", ".yml", ".yaml"]
+VARS_FILENAME_EXTENSIONS = ["", ".ini", ".yml", ".yaml", ".json"]
 RESERVED_FIELDS = ("hostname", "port", "username", "password", "platform", "connection_options")
 YAML = ruamel.yaml.YAML(typ="safe")
 LOG = logging.getLogger(__name__)
