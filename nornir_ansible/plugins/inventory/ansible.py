@@ -80,35 +80,31 @@ class AnsibleParser:
 
         """
         data = data or {}
-        if group == "defaults" or group == "all":
-            group_file = "all"
-            group = "defaults"
-            dest_group = self.defaults
-        else:
-            self.add(group, self.groups)
-            group_file = group
-            dest_group = self.groups[group]
-
-        if parent and parent != "defaults":
+        
+        group_was_added = self.add(group, self.groups)
+        dest_group = self.groups[group]
+        if parent and parent != "all":
+            print(group,parent)
             dest_group["groups"].append(parent)
 
         group_data = data.get("vars", {})
 
         vars_file_data = {}
-        if self._vars_file_exists(f"{self.path}/group_vars/{group_file}"):
-            vars_file_data = self.read_vars_file(
-                element=group_file, path=self.path, is_host=False, is_dir=False
-            )
-        elif Path(f"{self.path}/group_vars/{group_file}").is_dir():
-            for file in self._get_all_files(f"{self.path}/group_vars/{group_file}"):
-                t_vars_file_data = self.read_vars_file(
-                    element=group_file,
-                    path=file,
-                    is_host=False,
-                    is_dir=True,
+        if group_was_added:
+            if self._vars_file_exists(f"{self.path}/group_vars/{group}"):
+                vars_file_data = self.read_vars_file(
+                    element=group, path=self.path, is_host=False, is_dir=False
                 )
-                if isinstance(t_vars_file_data, dict):
-                    vars_file_data = {**t_vars_file_data, **vars_file_data}
+            elif Path(f"{self.path}/group_vars/{group}").is_dir():
+                for file in self._get_all_files(f"{self.path}/group_vars/{group}"):
+                    t_vars_file_data = self.read_vars_file(
+                        element=group,
+                        path=file,
+                        is_host=False,
+                        is_dir=True,
+                    )
+                    if isinstance(t_vars_file_data, dict):
+                        vars_file_data = {**t_vars_file_data, **vars_file_data}
 
         self.normalize_data(dest_group, group_data, vars_file_data)
         self.map_nornir_vars(dest_group)
@@ -121,7 +117,10 @@ class AnsibleParser:
     def parse(self) -> None:
         """Parse inventory entrypoint"""
         if self.original_data is not None:
-            self.parse_group("defaults", {'children': self.original_data})
+            self.parse_group("all", {'children': self.original_data})
+        self.defaults = self.groups.pop("all")
+        del self.defaults["groups"]
+
         self.sort_groups()
 
     def parse_hosts(self, hosts: AnsibleHostsDict, parent: Optional[str] = None) -> None:
@@ -136,7 +135,7 @@ class AnsibleParser:
         for host, data in hosts.items():
             data = data or {}
             self.add(host, self.hosts)
-            if parent and parent != "defaults":
+            if parent and parent != "all":
                 self.hosts[host]["groups"].append(parent)
 
             vars_file_data = {}
@@ -309,7 +308,7 @@ class AnsibleParser:
                 obj[nornir_var] = obj.pop(ansible_var)
 
     @staticmethod
-    def add(element: str, element_dict: Dict[str, VarsDict]) -> None:
+    def add(element: str, element_dict: Dict[str, VarsDict]) -> bool:
         """
         Determine if host/group is already in vars dict, if not add the host/group
 
@@ -317,9 +316,14 @@ class AnsibleParser:
             element: host or group being parsed
             element_dict: dictionary representing host/group: vars mapping
 
+        Returns:
+            bool: True if the element was added
         """
         if element not in element_dict:
             element_dict[element] = {"groups": [], "data": {}}
+            return True
+        else:
+            return False
 
     def load_hosts_file(self) -> None:
         """Parse host specific inventory files"""
