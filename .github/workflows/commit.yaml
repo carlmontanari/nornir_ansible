@@ -11,9 +11,9 @@ jobs:
         os: [ubuntu-latest, macos-latest]
         version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: set up python ${{ matrix.version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.version }}
       - name: setup test env
@@ -22,4 +22,4 @@ jobs:
           python -m pip install setuptools
           python -m pip install tox
       - name: run tox
-        run: python -m tox --skip-missing-interpreters=true
+        run: python -m tox -e py --skip-missing-interpreters=true
